@@ -120,7 +120,7 @@ Using in a CDS Hooks Sandbox Environment
 
 * In the sandbox, go to Apps and launch the CDS Hooks Sandbox app; give it the permissions it asks for
 
-* In the CDS Hooks Sandbox app, click on CDS Services in the upper-right, click Add CDS Service, and then enter the discovery URL of the service: http://localhost:8080/cds-services
+* In the CDS Hooks Sandbox app, click on CDS Services in the upper-right, click Add CDS Service, and then enter the discovery URL of the service: http://localhost:5000/cds-services
 
 * In the CDS Hooks Sandbox app, click Change Patient and enter one of the patient IDs you jotted down earlier
 
