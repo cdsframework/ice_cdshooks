@@ -89,6 +89,7 @@ Python:
 * pip install xmltodict
 * pip install flask
 * pip install flask_cors
+* pip intall requests
 
 pyiceclient:
 ------------
