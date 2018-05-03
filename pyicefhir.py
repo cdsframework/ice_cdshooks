@@ -26,17 +26,18 @@ def fhir2vmr(fhirdata):
     gender = fhirdata['patient']['resource']['gender'][0].upper()
     vmr_body = pyiceclient.VMR_HEADER % (str(uuid.uuid4()), dob, gender)
 
-    for iz in fhirdata['immunization']['resource']['entry']:
-        resource = iz['resource']
-        cvx_code = ''
-        date_of_admin = ''
-        if 'notGiven' not in resource or resource['notGiven'] == False:
-            for code in resource['vaccineCode']['coding']:
-                if code['system'] == 'http://www2a.cdc.gov/vaccines/IIS/IISStandards/vaccines.asp?rpt=cvx':
-                    cvx_code = code['code']
-            date_of_admin = resource['date'].replace('-','')[0:8]
-        if len(cvx_code) > 0 and len(date_of_admin) > 0:
-            vmr_body += pyiceclient.VMR_IZ % (str(uuid.uuid4()), str(uuid.uuid4()), cvx_code, date_of_admin, date_of_admin)
+    if 'immunization' in fhirdata and 'resource' in fhirdata['immunization'] and 'entry' in fhirdata['immunization']['resource']:
+        for iz in fhirdata['immunization']['resource']['entry']:
+            resource = iz['resource']
+            cvx_code = ''
+            date_of_admin = ''
+            if 'notGiven' not in resource or resource['notGiven'] == False:
+                for code in resource['vaccineCode']['coding']:
+                    if code['system'] == 'http://www2a.cdc.gov/vaccines/IIS/IISStandards/vaccines.asp?rpt=cvx':
+                        cvx_code = code['code']
+                date_of_admin = resource['date'].replace('-','')[0:8]
+            if len(cvx_code) > 0 and len(date_of_admin) > 0:
+                vmr_body += pyiceclient.VMR_IZ % (str(uuid.uuid4()), str(uuid.uuid4()), cvx_code, date_of_admin, date_of_admin)
 
     vmr_body += pyiceclient.VMR_FOOTER
     return vmr_body
