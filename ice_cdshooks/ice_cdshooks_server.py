@@ -48,7 +48,6 @@ def discovery():
 
 @app.route('/cds-services/ice', methods=['POST'])
 def service():
-    print(str(request))
     h = RequestHandler(Detail.LOW)
     return h.handle()
 
