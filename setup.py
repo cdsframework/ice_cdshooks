@@ -1,6 +1,5 @@
 from distutils.core import setup
 
-
 setup(name='ice_cdshooks',
       version='1.0.0',
       description='ICE CDS Hooks service',
@@ -8,4 +7,3 @@ setup(name='ice_cdshooks',
       author_email='ice@hln.com',
       url='https://cdsframework.atlassian.net/wiki',
       packages=['ice_cdshooks'])
-
