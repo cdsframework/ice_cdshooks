@@ -4,3 +4,5 @@
 pyiceclient\.py
 
 \.idea/
+
+build/

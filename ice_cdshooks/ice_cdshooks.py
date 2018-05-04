@@ -19,14 +19,11 @@ __copyright__ = "Copyright 2018, HLN Consulting, LLC"
 
 from flask import Flask, json, request
 from flask_cors import CORS
-from ice_cdshooks import pyiceclient
-from ice_cdshooks import pyicefhir
-from ice_cdshooks.Service import service
-import datetime
-import requests
+from Service import service as ice_service
+from Detail import Detail
 
 app = Flask(__name__)
-cors = CORS(app)
+CORS(app)
 
 # TODO:add diagnostic objects for ICE for immunity determination
 
@@ -50,12 +47,9 @@ def discovery():
 
 
 @app.route('/cds-services/ice', methods=['POST'])
-def ice_service():
-    return service()
-
-
-
-
+def service():
+    print(str(request))
+    return ice_service(Detail.LOW)
 
 
 if __name__ == '__main__':
