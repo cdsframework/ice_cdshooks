@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """FHIR extension to Python ICE client (pyiceclient):

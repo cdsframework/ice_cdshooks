@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+__author__ = "HLN Consulting, LLC"
+__copyright__ = "Copyright 2018, HLN Consulting, LLC"
+
 from flask import json, request
 from cdshooks_core import card
 from cdshooks_core import link
