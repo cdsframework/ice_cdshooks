@@ -15,19 +15,19 @@ __copyright__   = "Copyright 2018, HLN Consulting, LLC"
 import pyiceclient
 import uuid
 
-def fhir2vmr(fhirdata):
+def fhir2vmr(gender, birthDate, izs):
     """Take a FHIR data structure with a patient and immunization resource
     and transform it into a vMR. Return vMR. (Limitation: does not
     include evidence of disease/immunity)
 
     """
 
-    dob = fhirdata['patient']['resource']['birthDate'].replace('-','')
-    gender = fhirdata['patient']['resource']['gender'][0].upper()
+    dob = birthDate.replace('-','')
+    gender = gender[0].upper()
     vmr_body = pyiceclient.VMR_HEADER % (str(uuid.uuid4()), dob, gender)
 
-    if 'immunization' in fhirdata and 'resource' in fhirdata['immunization'] and 'entry' in fhirdata['immunization']['resource']:
-        for iz in fhirdata['immunization']['resource']['entry']:
+    if izs and isinstance(izs, list):
+        for iz in izs:
             resource = iz['resource']
             cvx_code = ''
             date_of_admin = ''
