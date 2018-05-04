@@ -19,8 +19,8 @@ __copyright__ = "Copyright 2018, HLN Consulting, LLC"
 
 from flask import Flask, json, request
 from flask_cors import CORS
-from Service import service as ice_service
-from Detail import Detail
+from ice_cdshooks.RequestHandler import RequestHandler
+from ice_cdshooks.Detail import Detail
 
 app = Flask(__name__)
 CORS(app)
@@ -49,7 +49,8 @@ def discovery():
 @app.route('/cds-services/ice', methods=['POST'])
 def service():
     print(str(request))
-    return ice_service(Detail.LOW)
+    h = RequestHandler(Detail.LOW)
+    return h.handle()
 
 
 if __name__ == '__main__':
