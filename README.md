@@ -25,9 +25,7 @@ License TBD.
 This software is based on sample code provided by the CDS Hooks
 project with the following license:
 
-.. code-block::
-
-
+```
     The MIT License
     
     Copyright (c) 2016 Matt Berther, https://matt.berther.io
@@ -37,7 +35,7 @@ project with the following license:
     The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
     
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+```
 
 ICE Software
 ============
@@ -94,23 +92,41 @@ Python:
 pyiceclient:
 ------------
 
-* git clone https://bitbucket.org/cdsframework/pyiceclient
+See project readme for details.
 
-This project:
+Install as a module https://bitbucket.org/cdsframework/pyiceclient/
+
+cdshooks_core:
+------------
+
+See project readme for details.
+
+Install as a module https://bitbucket.org/cdsframework/cdshooks_core/
+
+Running the server:
 -------------
 
 * Download release and unzip to project directory, or git clone <project url>; cd into project directory
-* Copy pyiceclient.py (see above) into project directory
-* Modify options in source code as needed
+* Install the pyiceclient module (see above)
+* Install the cdshooks_core module (see above)
+* Modify options in ice_cdshooks.py as needed
 * Run:
 
-.. code-block::
-
+```
    $ python ice_cdshooks.py
-
+```
 
 * Invoke the hooks from a CDS Hooks Sandbox Environment (see below)
 
+Install as a module
+-------------------
+
+Download or clone the project and cd into the directory.
+
+```
+    python setup.py build
+    sudo python setup.py install
+```
 
 Using in a CDS Hooks Sandbox Environment
 ========================================
