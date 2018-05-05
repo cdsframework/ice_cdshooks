@@ -19,8 +19,8 @@ __copyright__ = "Copyright 2018, HLN Consulting, LLC"
 
 from flask import Flask, json, request
 from flask_cors import CORS
-from ice_cdshooks.RequestHandler import RequestHandler
-from ice_cdshooks.Detail import Detail
+from ice_cdshooks import RequestHandler
+from ice_cdshooks import Detail
 
 app = Flask(__name__)
 CORS(app)

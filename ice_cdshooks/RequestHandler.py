@@ -4,12 +4,22 @@ __author__ = "HLN Consulting, LLC"
 __copyright__ = "Copyright 2018, HLN Consulting, LLC"
 
 from flask import json, request
-from cdshooks_core import card
-from cdshooks_core import link
+from cdshooks_core import Card
+from cdshooks_core import Link
+from cdshooks_core import Source
 from ice_cdshooks import pyicefhir
 import pyiceclient
 import datetime
 from ice_cdshooks.Detail import Detail
+
+SOURCE = Source('ICE', 'https://cdsframework.atlassian.net/wiki/spaces/ICE')
+ICE_SCHEDULE_LINK = Link('ICE Default Immunization Schedule',
+                         'https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/14352468/Default+Immunization+Schedule',
+                         'absolute')
+ACIP_SCHEDULE_LINK = Link('CDC / ACIP Immunization Schedule',
+                          'https://www.cdc.gov/vaccines/schedules/index.html',
+                          'absolute')
+ICE_WEBAPP_LINK = Link('ICE Web App', 'https://cds.hln.com/iceweb/#about', 'absolute')
 
 
 class RequestHandler:
@@ -50,40 +60,32 @@ class RequestHandler:
         response_vmr = pyiceclient.send_request(request_vmr, datetime.date.today().strftime('%Y-%m-%d'))
         (evaluation_list, forecast_list) = pyiceclient.process_vmr(response_vmr)
 
-        source = link('ICE', 'https://cdsframework.atlassian.net/wiki/spaces/ICE')
-
         card_list = []
         for forecast in forecast_list:
             if forecast[pyiceclient.ICE_FORECASTS_CONCEPT] == "RECOMMENDED" \
                     or forecast[pyiceclient.ICE_FORECASTS_CONCEPT] == "FUTURE_RECOMMENDED":
-                ice_card = card('ICE Recommendation Card', 'info', source)
-                ice_card['detail'] = forecast[pyiceclient.ICE_FORECASTS_GROUP] + ": " \
-                    + forecast[pyiceclient.ICE_FORECASTS_CONCEPT]
-                ice_card['links'].append(
-                    link('ICE Default Immunization Schedule',
-                         'https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/14352468/Default+Immunization+Schedule'))
-                ice_card['links'].append(
-                    link('CDC / ACIP Immunization Schedule', 'https://www.cdc.gov/vaccines/schedules/index.html'))
-                ice_card['links'].append(link('ICE Web App', 'https://cds.hln.com/iceweb/#about'))
+                ice_card = Card('ICE Recommendation Card', 'info', SOURCE, '')
+                ice_card.detail += forecast[pyiceclient.ICE_FORECASTS_GROUP] + ": " + forecast[
+                    pyiceclient.ICE_FORECASTS_CONCEPT]
+                ice_card.add_link(ICE_SCHEDULE_LINK)
+                ice_card.add_link(ACIP_SCHEDULE_LINK)
+                ice_card.add_link(ICE_WEBAPP_LINK)
 
-                card_list.append(ice_card)
+                card_list.append(ice_card.get_card())
 
         for evaluation in evaluation_list:
             if evaluation[6] == 'VALID':
                 indicator = 'info'
             else:
                 indicator = 'warning'
-            ice_card = card('ICE Evaluation Card', indicator, source)
-            ice_card['detail'] = 'Administration Date: ' + evaluation[1] + ' - CVX: ' + evaluation[2] + " - " + evaluation[
+            ice_card = Card('ICE Evaluation Card', indicator, SOURCE, '')
+            ice_card.detail += 'Administration Date: ' + evaluation[1] + ' - CVX: ' + evaluation[2] + " - " + evaluation[
                 3] + " - evaluation: " + evaluation[6]
-            ice_card['links'].append(
-                link('ICE Default Immunization Schedule',
-                     'https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/14352468/Default+Immunization+Schedule'))
-            ice_card['links'].append(
-                link('CDC / ACIP Immunization Schedule', 'https://www.cdc.gov/vaccines/schedules/index.html'))
-            ice_card['links'].append(link('ICE Web App', 'https://cds.hln.com/iceweb/#about'))
+            ice_card.add_link(ICE_SCHEDULE_LINK)
+            ice_card.add_link(ACIP_SCHEDULE_LINK)
+            ice_card.add_link(ICE_WEBAPP_LINK)
 
-            card_list.append(ice_card)
+            card_list.append(ice_card.get_card())
 
         # other card types: success, info, warning, hard-stop
 
