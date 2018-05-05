@@ -40,8 +40,8 @@ project with the following license:
 ICE Software
 ============
 
-This module requiers ICE server software to be accessible via a URL
-specified in pyiceclient.SERVER_ENDPOINT.
+This module requires ICE server software to be accessible via a URL
+specified in ice_cdshooks_server.ICE_SERVICE_ENDPOINT.
 
 The ICE server software is open source software with an open source
 license available at www.cdsframework.org > ICE > Documentation > Open
@@ -109,11 +109,11 @@ Running the server:
 * Download release and unzip to project directory, or git clone <project url>; cd into project directory
 * Install the pyiceclient module (see above)
 * Install the cdshooks_core module (see above)
-* Modify options in ice_cdshooks.py as needed
+* Modify options in ice_cdshooks_server.py as needed
 * Run:
 
 ```
-   $ python ice_cdshooks.py
+   $ python ice_cdshooks_server.py
 ```
 
 * Invoke the hooks from a CDS Hooks Sandbox Environment (see below)
