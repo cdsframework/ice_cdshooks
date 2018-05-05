@@ -103,7 +103,6 @@ class RequestHandler:
             card_list.append(ice_card.get_card())
 
         for evaluation in evaluation_list:
-            print (evaluation)
             if evaluation[pyiceclient.ICE_EVALS_EVAL_CODE] == 'VALID':
                 indicator = 'info'
             else:
@@ -125,7 +124,6 @@ class RequestHandler:
             card_list.append(ice_card.get_card())
 
         for rejected_iz in rejected_izs:
-            print(rejected_iz)
             ice_card = Card('ICE Substance Administration Evaluation Skipped Card', indicator, SOURCE, '')
             ice_card.detail += 'Substance administration not given:\r\n'
             ice_card.detail += '* Evaluation code: %s - %s\r\n' %\
