@@ -11,6 +11,7 @@ from ice_cdshooks import pyicefhir
 import pyiceclient
 import datetime
 from ice_cdshooks.Detail import Detail
+import requests
 
 SOURCE = Source('ICE', 'https://cdsframework.atlassian.net/wiki/spaces/ICE')
 ICE_SCHEDULE_LINK = Link('ICE Default Immunization Schedule',
@@ -35,7 +36,7 @@ class RequestHandler:
         gender = None
         birth_date = None
         izs = None
-        if 'prefetch' in fhirdata and fhirdata['prefetch']:
+        if 'prefetch' in fhirdata and fhirdata['prefetch'] and 'patient' in fhirdata['prefetch']:
             gender = fhirdata['prefetch']['patient']['resource']['gender']
             birth_date = fhirdata['prefetch']['patient']['resource']['birthDate']
             if 'immunization' in fhirdata['prefetch'] and 'resource' in fhirdata['prefetch']['immunization'] \
@@ -44,18 +45,29 @@ class RequestHandler:
             # print('prefetch izs=' + str(izs))
 
         elif 'fhirServer' in fhirdata and fhirdata['fhirServer'] \
-                and 'fhirAuthorization' in fhirdata and fhirdata['fhirAuthorization'] \
                 and 'patient' in fhirdata and fhirdata['patient']:
-            r = requests.get(fhirdata['fhirServer'] + '/Patient/' + fhirdata['patient'],
-                             headers={'Authorization': 'Bearer ' + fhirdata['fhirAuthorization']['access_token']})
+
+            if 'fhirAuthorization' in fhirdata and fhirdata['fhirAuthorization']:
+                r = requests.get(fhirdata['fhirServer'] + '/Patient/' + fhirdata['patient'],
+                                 headers={'Authorization': 'Bearer ' + fhirdata['fhirAuthorization']['access_token']})
+            else:
+                r = requests.get(fhirdata['fhirServer'] + '/Patient/' + fhirdata['patient'])
+
             patient = json.loads(r.text)
             gender = patient['gender']
             birth_date = patient['birthDate']
 
-            r = requests.get(fhirdata['fhirServer'] + '/Immunization', params={'patient': fhirdata['patient']},
+            if 'fhirAuthorization' in fhirdata and fhirdata['fhirAuthorization']:
+                r = requests.get(fhirdata['fhirServer'] + '/Immunization', params={'patient': fhirdata['patient']},
                              headers={'Authorization': 'Bearer ' + fhirdata['fhirAuthorization']['access_token']})
+            else:
+                r = requests.get(fhirdata['fhirServer'] + '/Immunization', params={'patient': fhirdata['patient']})
+
             immunizations = json.loads(r.text)
-            izs = immunizations['entry']
+            if 'entry' in immunizations:
+                izs = immunizations['entry']
+            else:
+                izs = list()
             # print('fetched izs=' + str(izs))
         else:
             raise ValueError('Incomplete patient data.')
@@ -81,7 +93,8 @@ class RequestHandler:
                 ice_card.detail += 'Future recommended: **%s**\r\n' % (forecast[pyiceclient.ICE_FORECASTS_GROUP],)
                 ice_card.detail += '* Due date: %s\r\n' % (format_date(forecast[pyiceclient.ICE_FORECASTS_DUE_DATE]),)
             elif forecast[pyiceclient.ICE_FORECASTS_CONCEPT] == 'CONDITIONAL':
-                ice_card.detail += 'Conditionally recommended: **%s**\r\n' % (forecast[pyiceclient.ICE_FORECASTS_GROUP],)
+                ice_card.detail += 'Conditionally recommended: **%s**\r\n' % (
+                forecast[pyiceclient.ICE_FORECASTS_GROUP],)
                 ice_card.detail += '* Conditional reason: %s\r\n' % (forecast[pyiceclient.ICE_FORECASTS_INTERP],)
             elif forecast[pyiceclient.ICE_FORECASTS_CONCEPT] == 'NOT_RECOMMENDED':
                 ice_card.detail += 'Not recommended: **%s**\r\n' % (forecast[pyiceclient.ICE_FORECASTS_GROUP],)
@@ -91,10 +104,12 @@ class RequestHandler:
                 ice_card.detail += '* CVX specific code: %s\r\n' % (forecast[pyiceclient.ICE_FORECASTS_VAC_CODE],)
 
             if forecast[pyiceclient.ICE_FORECASTS_EARLIEST_DATE]:
-                ice_card.detail += '* Earliest due date: %s\r\n' % (format_date(forecast[pyiceclient.ICE_FORECASTS_EARLIEST_DATE]),)
+                ice_card.detail += '* Earliest due date: %s\r\n' % (
+                format_date(forecast[pyiceclient.ICE_FORECASTS_EARLIEST_DATE]),)
 
             if forecast[pyiceclient.ICE_FORECASTS_PAST_DUE_DATE]:
-                ice_card.detail += '* Past due date: %s\r\n' % (format_date(forecast[pyiceclient.ICE_FORECASTS_PAST_DUE_DATE]),)
+                ice_card.detail += '* Past due date: %s\r\n' % (
+                format_date(forecast[pyiceclient.ICE_FORECASTS_PAST_DUE_DATE]),)
 
             ice_card.add_link(ICE_SCHEDULE_LINK)
             ice_card.add_link(ACIP_SCHEDULE_LINK)
@@ -110,7 +125,8 @@ class RequestHandler:
             ice_card = Card('ICE Substance Administration Evaluation Card', indicator, SOURCE, '')
             ice_card.detail += 'Substance administration evaluation:\r\n'
             ice_card.detail += '* Evaluation code: %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_EVAL_CODE],)
-            ice_card.detail += '* Administration date: %s\r\n' % (format_date(evaluation[pyiceclient.ICE_EVALS_DATE_OF_ADMIN]),)
+            ice_card.detail += '* Administration date: %s\r\n' % (
+            format_date(evaluation[pyiceclient.ICE_EVALS_DATE_OF_ADMIN]),)
             ice_card.detail += '* Substance administration group: %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_GROUP],)
             ice_card.detail += '* Substance administration code: %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_VACCINE],)
             ice_card.detail += '* Shot # %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_DOSE_NUM],)
@@ -126,8 +142,9 @@ class RequestHandler:
         for rejected_iz in rejected_izs:
             ice_card = Card('ICE Substance Administration Evaluation Skipped Card', indicator, SOURCE, '')
             ice_card.detail += 'Substance administration not given:\r\n'
-            ice_card.detail += '* Evaluation code: %s - %s\r\n' %\
-                               (rejected_iz['vaccineCode']['coding'][0]['code'], rejected_iz['vaccineCode']['coding'][0]['display'])
+            ice_card.detail += '* Evaluation code: %s - %s\r\n' % \
+                               (rejected_iz['vaccineCode']['coding'][0]['code'],
+                                rejected_iz['vaccineCode']['coding'][0]['display'])
             ice_card.detail += '* Administration date: %s\r\n' % (rejected_iz['date'][:10],)
 
             ice_card.add_link(ICE_SCHEDULE_LINK)
@@ -156,7 +173,8 @@ class RequestHandler:
                 rec_card.detail += 'Future recommended: **%s**\r\n' % (forecast[pyiceclient.ICE_FORECASTS_GROUP],)
                 rec_card.detail += '* Due date: %s\r\n' % (format_date(forecast[pyiceclient.ICE_FORECASTS_DUE_DATE]),)
             elif forecast[pyiceclient.ICE_FORECASTS_CONCEPT] == 'CONDITIONAL':
-                rec_card.detail += 'Conditionally recommended: **%s**\r\n' % (forecast[pyiceclient.ICE_FORECASTS_GROUP],)
+                rec_card.detail += 'Conditionally recommended: **%s**\r\n' % (
+                forecast[pyiceclient.ICE_FORECASTS_GROUP],)
                 rec_card.detail += '* Conditional reason: %s\r\n' % (forecast[pyiceclient.ICE_FORECASTS_INTERP],)
             elif forecast[pyiceclient.ICE_FORECASTS_CONCEPT] == 'NOT_RECOMMENDED':
                 rec_card.detail += 'Not recommended: **%s**\r\n' % (forecast[pyiceclient.ICE_FORECASTS_GROUP],)
@@ -166,10 +184,12 @@ class RequestHandler:
                 rec_card.detail += '* CVX specific code: %s\r\n' % (forecast[pyiceclient.ICE_FORECASTS_VAC_CODE],)
 
             if forecast[pyiceclient.ICE_FORECASTS_EARLIEST_DATE]:
-                rec_card.detail += '* Earliest due date: %s\r\n' % (format_date(forecast[pyiceclient.ICE_FORECASTS_EARLIEST_DATE]),)
+                rec_card.detail += '* Earliest due date: %s\r\n' % (
+                format_date(forecast[pyiceclient.ICE_FORECASTS_EARLIEST_DATE]),)
 
             if forecast[pyiceclient.ICE_FORECASTS_PAST_DUE_DATE]:
-                rec_card.detail += '* Past due date: %s\r\n' % (format_date(forecast[pyiceclient.ICE_FORECASTS_PAST_DUE_DATE]),)
+                rec_card.detail += '* Past due date: %s\r\n' % (
+                format_date(forecast[pyiceclient.ICE_FORECASTS_PAST_DUE_DATE]),)
             rec_card.detail += '\r\n'
 
         card_list.append(rec_card.get_card())
@@ -182,7 +202,8 @@ class RequestHandler:
         for evaluation in evaluation_list:
             eval_card.detail += 'Substance administration evaluation:\r\n'
             eval_card.detail += '* Evaluation code: %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_EVAL_CODE],)
-            eval_card.detail += '* Administration date: %s\r\n' % (format_date(evaluation[pyiceclient.ICE_EVALS_DATE_OF_ADMIN]),)
+            eval_card.detail += '* Administration date: %s\r\n' % (
+            format_date(evaluation[pyiceclient.ICE_EVALS_DATE_OF_ADMIN]),)
             eval_card.detail += '* Substance administration group: %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_GROUP],)
             eval_card.detail += '* Substance administration code: %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_VACCINE],)
             eval_card.detail += '* Shot # %s\r\n' % (evaluation[pyiceclient.ICE_EVALS_DOSE_NUM],)
@@ -199,8 +220,9 @@ class RequestHandler:
 
         for rejected_iz in rejected_izs:
             skip_card.detail += 'Substance administration reported but not given:\r\n'
-            skip_card.detail += '* Evaluation code: %s - %s\r\n' %\
-                               (rejected_iz['vaccineCode']['coding'][0]['code'], rejected_iz['vaccineCode']['coding'][0]['display'])
+            skip_card.detail += '* Evaluation code: %s - %s\r\n' % \
+                                (rejected_iz['vaccineCode']['coding'][0]['code'],
+                                 rejected_iz['vaccineCode']['coding'][0]['display'])
             skip_card.detail += '* Administration date: %s\r\n' % (rejected_iz['date'][:10],)
             skip_card.detail += '\r\n'
 
