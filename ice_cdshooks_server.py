@@ -43,8 +43,8 @@ def discovery():
                 'description': 'An Immunization Forecasting CDS service: High Detail',
                 'id': 'ice-high',
                 'prefetch': {
-                    'patient': 'Patient/{{Patient.id}}',
-                    'immunization': 'Immunization?patient={{Patient.id}}'
+                    'patient': 'Patient/{{context.patientId}}',
+                    'immunization': 'Immunization?patient={{context.patientId}}'
                 }
             },
             {
@@ -53,8 +53,8 @@ def discovery():
                 'description': 'An Immunization Forecasting CDS service: Low Detail',
                 'id': 'ice-low',
                 'prefetch': {
-                    'patient': 'Patient/{{Patient.id}}',
-                    'immunization': 'Immunization?patient={{Patient.id}}'
+                    'patient': 'Patient/{{context.patientId}}',
+                    'immunization': 'Immunization?patient={{context.patientId}}'
                 }
             }
 
