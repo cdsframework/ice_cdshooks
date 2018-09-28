@@ -30,7 +30,7 @@ CORS(app)
 # IZ_CODE_SYSTEM is the code system identifier to look for in the patient Immunization history
 IZ_CODE_SYSTEM = 'http://www2a.cdc.gov/vaccines/IIS/IISStandards/vaccines.asp?rpt=cvx'
 # ICE_SERVICE_ENDPOINT is the URL of the ICE evaluate web service - intended to be on the localhost
-ICE_SERVICE_ENDPOINT = "http://localhost/opencds-decision-support-service/evaluate"
+ICE_SERVICE_ENDPOINT = "https://cds.hln.com/opencds-decision-support-service/evaluate"
 
 
 @app.route('/cds-services')
