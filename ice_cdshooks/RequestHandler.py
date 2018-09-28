@@ -20,7 +20,7 @@ ICE_SCHEDULE_LINK = Link('ICE Default Immunization Schedule',
 ACIP_SCHEDULE_LINK = Link('CDC / ACIP Immunization Schedule',
                           'https://www.cdc.gov/vaccines/schedules/index.html',
                           'absolute')
-ICE_WEBAPP_LINK = Link('ICE Web App', 'https://cds.hln.com/iceweb/#about', 'absolute')
+ICE_WEBAPP_LINK = Link('ICE SMART App', 'http://cds.hln.com/smart-ice-client/launch.html', 'smart')
 
 
 class RequestHandler:
